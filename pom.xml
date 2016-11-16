@@ -197,6 +197,13 @@
             <version>${munit.version}</version>
             <scope>test</scope>
         </dependency>
+        
+        <dependency>
+        	<groupId>com.hsbc</groupId>
+			<artifactId>common-utils</artifactId>
+		    <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+        
     </dependencies>
 
 	<repositories>

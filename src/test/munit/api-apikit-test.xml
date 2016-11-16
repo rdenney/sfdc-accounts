@@ -7,7 +7,7 @@ http://www.mulesoft.org/schema/mule/mock http://www.mulesoft.org/schema/mule/moc
     <spring:beans>
         <spring:import resource="classpath:api.xml" />
         <spring:import resource="classpath:accounts-api-implementation.xml" />
-        <spring:import resource="classpath:common.xml" />
+        <spring:import resource="classpath:global.xml" />
     </spring:beans>
     <munit:config mock-connectors="false" mock-inbounds="false" doc:name="MUnit configuration"/>
     <http:request-config name="HTTP_Request_Configuration" host="localhost" port="8081" basePath="/api" doc:name="HTTP Request Configuration"/>

@@ -4,12 +4,18 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 http://www.mulesoft.org/schema/mule/apikit http://www.mulesoft.org/schema/mule/apikit/current/mule-apikit.xsd
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
 http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd">
+    
+    
+    
     <http:listener-config name="api-httpListenerConfig" host="0.0.0.0" port="8081" doc:name="HTTP Listener Configuration"/>
     <apikit:config name="api-config" raml="api.raml" consoleEnabled="false" doc:name="Router"/>
     <flow name="api-main">
         <http:listener config-ref="api-httpListenerConfig" path="/api/*" doc:name="HTTP"/>
         <flow-ref name="setCorrelationId" doc:name="setCorrelationId"/>
+        <vm:outbound-endpoint exchange-pattern="one-way" path="vm.preserve.message" doc:name="vm.preserve.message"/>
+        <logger message="{&quot;message&quot;:&quot;Request Received&quot;, &quot;CID&quot;: &quot;#[message.correlationId]&quot;, &quot;applicationName&quot;:&quot;#[app.name]&quot;, &quot;flowName&quot;:&quot;#[flow.name]&quot;, &quot;http.method&quot;:&quot;#[message.inboundProperties.'http.method']&quot;, &quot;http.request.uri&quot;:&quot;#[message.inboundProperties.'http.request.uri']&quot;}" level="INFO" doc:name="Logger" category="messageTrace"/>
         <apikit:router config-ref="api-config" doc:name="APIkit Router"/>
+        <logger message="{&quot;message&quot;:&quot;Request Completed&quot;, &quot;CID&quot;: &quot;#[message.correlationId]&quot;, &quot;applicationName&quot;:&quot;#[app.name]&quot;, &quot;flowName&quot;:&quot;#[flow.name]&quot;, &quot;http.method&quot;:&quot;#[message.inboundProperties.'http.method']&quot;, &quot;http.request.uri&quot;:&quot;#[message.inboundProperties.'http.request.uri']&quot;}" level="INFO" category="messageTrace" doc:name="Logger"/>
         <exception-strategy ref="api-apiKitGlobalExceptionMapping" doc:name="Reference Exception Strategy"/>
     </flow>
     <flow name="api-console">
@@ -19,7 +25,9 @@ http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/cu
     
     
     <flow name="get:/accounts:api-config">
+        <logger message="{&quot;message&quot;:&quot;Invoked API Interface Flow. Delegating to Implementation Flow&quot;, &quot;CID&quot;: &quot;#[message.correlationId]&quot;, &quot;applicationName&quot;:&quot;#[app.name]&quot;, &quot;flowName&quot;:&quot;#[flow.name]&quot;, &quot;http.method&quot;:&quot;#[message.inboundProperties.'http.method']&quot;, &quot;http.request.uri&quot;:&quot;#[message.inboundProperties.'http.request.uri']&quot;}" level="INFO" category="messageTrace" doc:name="Logger"/>
         <flow-ref name="get:/accounts:implementation" doc:name="get:/accounts:implementation"/>
+        <logger message="{&quot;message&quot;:&quot;API Interface Flow Completed&quot;, &quot;CID&quot;: &quot;#[message.correlationId]&quot;, &quot;applicationName&quot;:&quot;#[app.name]&quot;, &quot;flowName&quot;:&quot;#[flow.name]&quot;, &quot;http.method&quot;:&quot;#[message.inboundProperties.'http.method']&quot;, &quot;http.request.uri&quot;:&quot;#[message.inboundProperties.'http.request.uri']&quot;}" level="INFO" category="messageTrace" doc:name="Logger"/>
     </flow>
     
     <flow name="post:/accounts:application/json:api-config">
