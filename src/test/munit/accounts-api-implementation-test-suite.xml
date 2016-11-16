@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:mock="http://www.mulesoft.org/schema/mule/mock"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:spring="http://www.springframework.org/schema/beans" xmlns:core="http://www.mulesoft.org/schema/mule/core" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/mock http://www.mulesoft.org/schema/mule/mock/current/mule-mock.xsd
+http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+    <munit:config name="munit" doc:name="MUnit configuration"/>
+    <spring:beans>
+        <spring:import resource="classpath:accounts-api-implementation.xml"/>
+    </spring:beans>
+    <munit:test name="accounts-api-implementation-test-suite-post:/accounts:application/json:implementationTest" description="Test">
+        <mock:when messageProcessor="sfdc:create-single" doc:name="Mock">
+            <mock:then-return payload="#[getResource('scaffolder/response/post_201_accounts_application_json.json').asString()]"/>
+        </mock:when>
+        <munit:set payload="#[getResource('scaffolder/request/post_accounts_application_json.json').asString()]" mimeType="application/json" doc:name="Set Message"/>
+        <flow-ref name="post:/accounts:application/json:implementation" doc:name="post:/accounts:application/json:implementation"/>
+        <munit:assert-on-equals message="The response payload is not correct!" expectedValue="#[getResource('scaffolder/response/post_201_accounts_application_json.json').asString()]" actualValue="#[payload]" doc:name="assert that - payload is as expected"/>
+    </munit:test>
+</mule>

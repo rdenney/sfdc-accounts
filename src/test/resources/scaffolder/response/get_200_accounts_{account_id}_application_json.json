@@ -1,0 +1,10 @@
+{
+  "accountNumber": "123",
+  "name": "Acme Co.",
+  "address": "555 Market St",
+  "city": "San Francisco",
+  "state": "CA",
+  "postal": 90104,
+  "country": "USA",
+  "phone": "(800) 555-5785"
+}

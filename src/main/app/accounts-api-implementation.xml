@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:vm="http://www.mulesoft.org/schema/mule/vm" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:sfdc="http://www.mulesoft.org/schema/mule/sfdc"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/sfdc http://www.mulesoft.org/schema/mule/sfdc/current/mule-sfdc.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd">
+
+	<sfdc:config name="Salesforce__Basic_Authentication" username="ryan.denney@mulesoft.com" password="1PurpleElephant" securityToken="rlBIAFGf6enqHBVGDQUaxpKz" doc:name="Salesforce: Basic Authentication"/>
+	
+	<flow name="get:/accounts:implementation">
+        <logger message="{&quot;message&quot;:&quot;Invoked API Implementation Flow. Begin Processing ...&quot;, &quot;CID&quot;: &quot;#[message.correlationId]&quot;, &quot;applicationName&quot;:&quot;#[app.name]&quot;, &quot;flowName&quot;:&quot;#[flow.name]&quot;, &quot;http.method&quot;:&quot;#[message.inboundProperties.'http.method']&quot;, &quot;http.request.uri&quot;:&quot;#[message.inboundProperties.'http.request.uri']&quot;}" level="INFO" category="messageTrace" doc:name="Logger"/>
+        <sfdc:query config-ref="Salesforce__Basic_Authentication" query="dsql:SELECT AccountNumber,Name FROM Account" doc:name="Salesforce"/>
+        <dw:transform-message doc:name="Transform Message">
+            <dw:input-payload doc:sample="sample_data/list_Account.dwl"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+payload map ((payload01 , indexOfPayload01) -> {
+	accountNumber: payload01.AccountNumber,
+	name: payload01.Name
+})]]></dw:set-payload>
+        </dw:transform-message>
+<!--         <logger message="#[/]" level="INFO" doc:name="Break It"/> -->
+        <logger message="{&quot;message&quot;:&quot;API Implementation Flow Completed&quot;, &quot;CID&quot;: &quot;#[message.correlationId]&quot;, &quot;applicationName&quot;:&quot;#[app.name]&quot;, &quot;flowName&quot;:&quot;#[flow.name]&quot;, &quot;http.method&quot;:&quot;#[message.inboundProperties.'http.method']&quot;, &quot;http.request.uri&quot;:&quot;#[message.inboundProperties.'http.request.uri']&quot;}" level="INFO" category="messageTrace" doc:name="Logger"/>
+        <catch-exception-strategy doc:name="Catch Exception Strategy">
+            <logger message="{&quot;message&quot;:&quot;Exception Caught - #[exception.cause.?message or exception.cause]&quot;, &quot;CID&quot;: &quot;#[message.correlationId]&quot;, &quot;applicationName&quot;:&quot;#[app.name]&quot;, &quot;flowName&quot;:&quot;#[flow.name]&quot;, &quot;http.method&quot;:&quot;#[message.inboundProperties.'http.method']&quot;, &quot;http.request.uri&quot;:&quot;#[message.inboundProperties.'http.request.uri']&quot;}" level="INFO" category="messageTrace" doc:name="Logger"/>
+            <vm:outbound-endpoint exchange-pattern="one-way" path="vm.error.publisher" doc:name="vm.error.publisher"/>
+            <set-payload value="{&quot;errorMessage&quot;:&quot;#[exception.cause.?message or exception.cause]&quot;}" doc:name="Set Payload"/>
+            <set-property propertyName="http.status" value="500" doc:name="Property"/>
+        </catch-exception-strategy>
+    </flow>
+    
+    <flow name="post:/accounts:application/json:implementation">
+        <dw:transform-message doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+{
+	Name: payload.name,
+	BillingStreet: payload.address,
+	BillingCity: payload.city,
+	BillingState: payload.state,
+	BillingPostalCode: payload.postal as :string,
+	BillingCountry: payload.country,
+	Phone: payload.phone,
+	AccountNumber: payload.accountNumber
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <sfdc:create-single config-ref="Salesforce__Basic_Authentication" type="Account" doc:name="Salesforce"/>
+        <set-property propertyName="Content-Type" value="application/json" doc:name="Property"/>
+    </flow>
+    
+    
+    <flow name="get:/accounts/{account_id}:implementation">
+        <set-payload value="{&#xA;  &quot;accountNumber&quot;: &quot;123&quot;,&#xA;  &quot;name&quot;: &quot;Acme Co.&quot;,&#xA;  &quot;address&quot;: &quot;555 Market St&quot;,&#xA;  &quot;city&quot;: &quot;San Francisco&quot;,&#xA;  &quot;state&quot;: &quot;CA&quot;,&#xA;  &quot;postal&quot;: 90104,&#xA;  &quot;country&quot;: &quot;USA&quot;,&#xA;  &quot;phone&quot;: &quot;(800) 555-5785&quot;&#xA;}" doc:name="Set Payload"/>
+    </flow>
+    
+    <flow name="put:/accounts/{account_id}:application/json:implementation">
+        <set-payload value="#[NullPayload.getInstance()]" doc:name="Set Payload"/>
+    </flow>
+    
+    <flow name="delete:/accounts/{account_id}:implementation">
+        <set-payload value="#[NullPayload.getInstance()]" doc:name="Set Payload"/>
+    </flow>
+
+</mule>

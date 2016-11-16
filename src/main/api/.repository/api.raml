@@ -1,0 +1,158 @@
+#%RAML 0.8
+title: SFDC Accounts API
+version: v1
+
+traits:
+  - traceable:
+      headers:
+        MULE_CORRELATION_ID:
+          required: true
+          
+
+/accounts:
+  is: [traceable]
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            example: |
+              [{
+                "accountNumber":"123",
+                "name":"Acme Co."
+              }]
+  post:
+    body:
+      application/json:
+        example: |
+          {
+            "accountNumber":"123",
+            "name":"Acme Co.",
+            "address":"555 Market St",
+            "city":"San Francisco",
+            "state": "CA",
+            "postal": 90104,
+            "country":"USA",
+            "phone":"(800) 555-5785"
+          }
+        schema: |
+          {
+              "$schema": "http://json-schema.org/draft-04/schema#",
+              "type": "object",
+              "properties": {
+                  "accountNumber": {
+                      "type": "string"
+                  },
+                  "name": {
+                      "type": "string"
+                  },
+                  "address": {
+                      "type": "string"
+                  },
+                  "city": {
+                      "type": "string"
+                  },
+                  "state": {
+                      "type": "string"
+                  },
+                  "postal": {
+                      "type": "integer"
+                  },
+                  "country": {
+                      "type": "string"
+                  },
+                  "phone": {
+                      "type": "string"
+                  }
+              },
+              "required": [
+                  "accountNumber",
+                  "name",
+                  "address",
+                  "city",
+                  "state",
+                  "postal"
+              ]
+          }
+    responses:
+      201:
+        body:
+          application/json:
+            example: |
+              {"accountNumber":"123"}
+  /{account_id}:
+    is: [traceable]
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              example: |
+                {
+                  "accountNumber": "123",
+                  "name": "Acme Co.",
+                  "address": "555 Market St",
+                  "city": "San Francisco",
+                  "state": "CA",
+                  "postal": 90104,
+                  "country": "USA",
+                  "phone": "(800) 555-5785"
+                }
+    put:
+      body:
+        application/json:
+          example: |
+            {
+              "accountNumber":"123",
+              "name":"Acme Co.",
+              "address":"555 Market St",
+              "city":"San Francisco",
+              "state": "CA",
+              "postal": 90104,
+              "country":"USA",
+              "phone":"(800) 555-5785"
+            }
+          schema: |
+            {
+                "$schema": "http://json-schema.org/draft-04/schema#",
+                "type": "object",
+                "properties": {
+                    "accountNumber": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "address": {
+                        "type": "string"
+                    },
+                    "city": {
+                        "type": "string"
+                    },
+                    "state": {
+                        "type": "string"
+                    },
+                    "postal": {
+                        "type": "integer"
+                    },
+                    "country": {
+                        "type": "string"
+                    },
+                    "phone": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "accountNumber",
+                    "name",
+                    "address",
+                    "city",
+                    "state",
+                    "postal"
+                ]
+            }
+      responses:
+        204:
+    delete:
+      responses:
+        204:
